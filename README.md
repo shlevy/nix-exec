@@ -106,7 +106,7 @@ Example
 This prints out the arguments passed to it, one per line:
 
 ```nix
-#/usr/bin/env nix-exec
+#!/usr/bin/env nix-exec
 { args, lib }: let
   pkgs = import <nixpkgs> {};
 
