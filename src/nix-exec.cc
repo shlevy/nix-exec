@@ -35,7 +35,7 @@ static void realiseContext(const nix::PathSet & context)
     if (i.at(0) == '!') {
       auto index = i.find("!", 1);
       ctx = std::string(i, index + 1);
-      drvs.insert(ctx + std::string(i, 0, index - 1));
+      drvs.insert(ctx + std::string(i, 0, index));
     } else
       ctx = i;
 
@@ -125,7 +125,8 @@ static void run_io(nix::EvalState & state, nix::Value * io_val, nix::Pos * pos) 
           throw nix::EvalError(format(invalid_io_message) % pos);
 
         auto ctx = nix::PathSet{};
-        auto filename = state.forceString(*filename_attr->value, ctx);
+        auto filename = state.coerceToString(*filename_attr->pos,
+            *filename_attr->value, ctx, false, false);
         realiseContext(ctx);
 
         auto handle = ::dlopen(filename.c_str(), RTLD_LAZY | RTLD_LOCAL);
