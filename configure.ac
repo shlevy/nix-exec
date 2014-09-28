@@ -1,6 +1,6 @@
 AC_INIT([nix-exec], [1.0.0])
 
-AM_INIT_AUTOMAKE([foreign -Wall subdir-objects])
+AM_INIT_AUTOMAKE([foreign -Wall subdir-objects dist-xz no-dist-gzip])
 
 AC_CONFIG_SRCDIR([LICENSE])
 

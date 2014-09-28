@@ -10,3 +10,5 @@ include_HEADERS = include/nix-exec.h
 
 nixlibdir = $(datadir)/nix
 dist_nixlib_DATA = nix/lib.nix
+
+EXTRA_DIST=LICENSE

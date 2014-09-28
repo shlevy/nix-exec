@@ -12,3 +12,5 @@ nix-exec
 .deps
 .dirstamp
 *.o
+
+nix-exec-*.tar.xz
