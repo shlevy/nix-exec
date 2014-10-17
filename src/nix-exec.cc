@@ -24,6 +24,12 @@ static void setup_args(nix::EvalState & state, nix::Value & args, nix::Strings::
   } while (--arg_count);
 }
 
+static void setup_lib(nix::EvalState & state, nix::Value & lib) {
+  auto expr = state.parseExprFromFile(NIXEXEC_DATA_DIR "/nix/lib.nix");
+
+  state.eval(expr, lib);
+}
+
 static void run() {
   nix::initNix();
 
@@ -91,7 +97,8 @@ static void run() {
   auto result = state.allocValue();
   state.callFunction(*fn, *fn_args, *result, top_pos);
 
-  run_io(state, result, &top_pos);
+  nix::Value v;
+  run_io(state, result, &top_pos, v);
 }
 
 int main(int argc, char ** argv) {

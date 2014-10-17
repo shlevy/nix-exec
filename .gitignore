@@ -17,8 +17,10 @@ ltmain.sh
 .libs
 *.o
 *.lo
+*.la
 
-librunio.la
+nix/unsafe-perform-io.nix
+
 nix-exec
 
 nix-exec-*.tar.xz

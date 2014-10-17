@@ -93,6 +93,19 @@ Global symbols
 In addition, symbols defined in `libnixmain`, `libnixexpr`, and `libnixstore`
 are all available.
 
+unsafe-perform-io.nix
+----------------------
+
+For cases where the expression author doesn't completely control the invocation
+of the evaluator (e.g. `nixops` has no way to specify that it should run
+`nix-exec`), `nix-exec` installs `unsafe-perform-io.nix` in `$(datadir)/nix`.
+This evaluates to a function which takes an argument list and a function
+meeting the requirements of `Expression entry point` above, calls the function
+with `lib` and the passed-in argument list, runs the resultant IO value, and
+returns its result. This uses `builtins.importNative` under the hood, so it
+requires the `allow-unsafe-native-code-during-evaluation` nix option to be set
+to true.
+
 API stability
 --------------
 

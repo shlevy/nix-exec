@@ -56,7 +56,7 @@ static void realiseContext(const nix::PathSet & context)
   }
 }
 
-void run_io(nix::EvalState & state, nix::Value * io_val, nix::Pos * pos) {
+void run_io(nix::EvalState & state, nix::Value * io_val, const nix::Pos * pos, nix::Value & v) {
   using boost::format;
   constexpr char invalid_io_message[] =
     "attempted to run invalid io value (please use nix-exec lib functions!), at %1%";
@@ -174,10 +174,6 @@ void run_io(nix::EvalState & state, nix::Value * io_val, nix::Pos * pos) {
       --m_level;
     }
   }
-}
 
-void setup_lib(nix::EvalState & state, nix::Value & lib) {
-  auto expr = state.parseExprFromFile(NIXEXEC_DATA_DIR "/nix/lib.nix");
-
-  state.eval(expr, lib);
+  v = *io_val;
 }

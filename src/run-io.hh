@@ -8,6 +8,4 @@ namespace nix {
   struct Pos;
 }
 
-void run_io(nix::EvalState & state, nix::Value * io_val, nix::Pos * pos);
-
-void setup_lib(nix::EvalState & state, nix::Value & lib);
+void run_io(nix::EvalState & state, nix::Value * io_val, const nix::Pos * pos, nix::Value & v);

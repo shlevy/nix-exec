@@ -1,0 +1,5 @@
+let
+  lib = import ./lib.nix;
+
+  prim = builtins.importNative @nixplugindir@/libunsafeperformio.so "init";
+in args: io-fn: prim (io-fn { inherit args lib; })
