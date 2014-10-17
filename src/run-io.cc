@@ -19,7 +19,7 @@ const char * nixexec_prefix = NIXEXEC_PREFIX;
 const char * nixexec_data_dir = NIXEXEC_DATA_DIR;
 
 const unsigned int nixexec_version_patchlevel = 0x0;
-const unsigned int nixexec_version_minor = 0x0;
+const unsigned int nixexec_version_minor = 0x1;
 const unsigned int nixexec_version_major = 0x1;
 
 int nixexec_argc;
