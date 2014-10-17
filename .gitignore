@@ -4,13 +4,21 @@ aclocal.m4
 autom4te.cache
 config.log
 config.status
+config.guess
+config.sub
 configure
 depcomp
 install-sh
 missing
-nix-exec
+libtool
+ltmain.sh
 .deps
 .dirstamp
+.libs
 *.o
+*.lo
+
+librunio.la
+nix-exec
 
 nix-exec-*.tar.xz
