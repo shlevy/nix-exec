@@ -18,43 +18,12 @@ extern "C" {
 const char * nixexec_prefix = NIXEXEC_PREFIX;
 const char * nixexec_data_dir = NIXEXEC_DATA_DIR;
 
-const unsigned int nixexec_version_patchlevel = 0x0;
+const unsigned int nixexec_version_patchlevel = 0x1;
 const unsigned int nixexec_version_minor = 0x1;
 const unsigned int nixexec_version_major = 0x1;
 
 int nixexec_argc;
 char ** nixexec_argv;
-
-/* !!! Copied from primops.cc in nix
- * I wrote it so own the copyright... */
-
-static void realiseContext(const nix::PathSet & context)
-{
-  auto drvs = nix::PathSet{};
-  for (const auto & i : context) {
-    auto ctx = nix::Path{};
-
-    if (i.at(0) == '!') {
-      auto index = i.find("!", 1);
-      ctx = std::string(i, index + 1);
-      drvs.insert(ctx + std::string(i, 0, index));
-    } else
-      ctx = i;
-
-    if (!nix::store->isValidPath(ctx))
-      throw nix::EvalError(boost::format("path `%1%' is not valid") % ctx);
-  }
-
-  if (!drvs.empty()) {
-    /* For performance, prefetch all substitute info. */
-    nix::PathSet willBuild, willSubstitute, unknown;
-    unsigned long long downloadSize, narSize;
-    nix::queryMissing(*nix::store, drvs,
-      willBuild, willSubstitute, unknown, downloadSize, narSize);
-
-    nix::store->buildPaths(drvs);
-  }
-}
 
 void run_io(nix::EvalState & state, nix::Value * io_val, const nix::Pos * pos, nix::Value & v) {
   using boost::format;
@@ -129,7 +98,12 @@ void run_io(nix::EvalState & state, nix::Value * io_val, const nix::Pos * pos, n
         auto ctx = nix::PathSet{};
         auto filename = state.coerceToString(*filename_attr->pos,
             *filename_attr->value, ctx, false, false);
-        realiseContext(ctx);
+        try {
+          nix::realiseContext(ctx);
+        } catch (nix::InvalidPathError & e) {
+          throw nix::EvalError(format("cannot dlopen `%1%', since path `%2%' is not valid, at %3%")
+              % filename % e.path % *pos);
+        }
 
         auto handle = ::dlopen(filename.c_str(), RTLD_LAZY | RTLD_LOCAL);
         if (!handle)
