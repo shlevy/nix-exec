@@ -99,12 +99,9 @@ unsafe-perform-io.nix
 For cases where the expression author doesn't completely control the invocation
 of the evaluator (e.g. `nixops` has no way to specify that it should run
 `nix-exec`), `nix-exec` installs `unsafe-perform-io.nix` in `$(datadir)/nix`.
-This evaluates to a function which takes an argument list and a function
-meeting the requirements of `Expression entry point` above, calls the function
-with `lib` and the passed-in argument list, runs the resultant IO value, and
-returns its result. This uses `builtins.importNative` under the hood, so it
-requires the `allow-unsafe-native-code-during-evaluation` nix option to be set
-to true.
+This evaluates to a function which takes an IO value, runs it, and returns the
+result. This uses `builtins.importNative` under the hood, so it requires the
+`allow-unsafe-native-code-during-evaluation` nix option to be set to true.
 
 Note that when using `unsafe-perform-io.nix`, `nixexec_argc` will be `0` and
 `nixexec_argv` will be `NULL` unless called within an actual `nix-exec`
