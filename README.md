@@ -38,7 +38,7 @@ The top-level script should evaluate to a function of a single argument
 that returns a `nix-exec` IO value (see below). The argument will be an
 attribute set containing a list `args` of the arguments passed to the script
 (including the script name) and an attribute set `lib` containing the IO
-monad functions.
+monad functions and `nix-exec`'s configuration settings.
 
 IO monad
 ---------
@@ -76,19 +76,27 @@ defined in `<nix/eval.hh>`.
 The `filename` argument can be the result of a derivation, in which case
 `nix-exec` will build the derivation before trying to dynamically load it.
 
+Configuration settings
+-----------------------
+
+The `configuration` attribute in the `nix-exec` `lib` argument is a set
+containing the following information about the compile-time configuration
+of `nix-exec`:
+
+* `prefix`: The installation prefix
+* `datadir`:  The data directory
+* `version.major`: The major version number
+* `version.minor`: The minor version number
+* `version.patchlevel`: The version patchlevel.
+
 Global symbols
 --------------
 
 `nix-exec` defines a number of external variables in the C header
 `<nix-exec.h>` to introspect the execution environment:
 
-* `nixexec_prefix`: The prefix `nix-exec` is installed into
-* `nixexec_data_dir`: The data directory `nix-exec`'s nix expressions
-  are installed into
-* `nixexec_version_patchlevel`, `nixexec_version_minor`,
-  `nixexec_version_major`: The version of `nix-exec` running
-* `nixexec_argc`, `nixexec_argv`: The full argument list passed
-  to `nix-exec`, including arguments that were passed to `nix`.
+* `nixexec_argc`: The number of arguments passed to `nix-exec`
+* `nixexec_argv`: A NULL-terminated list of arguments passed to `nix-exec`
 
 In addition, symbols defined in `libnixmain`, `libnixexpr`, and `libnixstore`
 are all available.
@@ -102,6 +110,9 @@ of the evaluator (e.g. `nixops` has no way to specify that it should run
 This evaluates to a function which takes an IO value, runs it, and returns the
 result. This uses `builtins.importNative` under the hood, so it requires the
 `allow-unsafe-native-code-during-evaluation` nix option to be set to true.
+
+Import `$(datadir)/nix/lib.nix` for access to the `nix-exec` lib when running
+outside of a `nix-exec` invocation.
 
 Note that when using `unsafe-perform-io.nix`, `nixexec_argc` will be `0` and
 `nixexec_argv` will be `NULL` unless called within an actual `nix-exec`

@@ -20,6 +20,7 @@ ltmain.sh
 *.la
 
 nix/unsafe-perform-io.nix
+nix/lib.nix
 
 nix-exec
 

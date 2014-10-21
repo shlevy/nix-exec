@@ -42,9 +42,6 @@ static void run() {
       std::cerr << "Usage: " << nixexec_argv[0] << " FILE ARGS..." << std::endl;
       throw nix::Exit();
     } else if (*arg == "--version") {
-      std::cout << nixexec_argv[0] << " " << nixexec_version_major << ".";
-      std::cout << nixexec_version_minor << "." << nixexec_version_patchlevel;
-      std::cout << " (Nix " << nix::nixVersion << ")" << std::endl;
       std::cout << nixexec_argv[0] << " " VERSION " (Nix " << nix::nixVersion << ")" << std::endl;
       throw nix::Exit();
     } else if (nix::parseSearchPathArg(arg, end, search_path)) {

@@ -10,4 +10,18 @@
       then arg: go (args ++ [ arg ]) (arity - 1)
       else { inherit filename symbol args; type = "io"; subtype = "dlopen"; };
   in go [] arity;
+
+  configuration = {
+    prefix = @prefix@;
+
+    datadir = @datadir@;
+
+    version = {
+      major = @version_major@;
+
+      minor = @version_minor@;
+
+      patchlevel = @version_patchlevel@;
+    };
+  };
 }
