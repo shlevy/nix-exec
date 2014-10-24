@@ -22,6 +22,8 @@ ltmain.sh
 nix/unsafe-perform-io.nix
 nix/lib.nix
 
+scripts/fetchgit.sh
+
 nix-exec
 
 nix-exec-*.tar.xz

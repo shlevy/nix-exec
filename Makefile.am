@@ -1,6 +1,6 @@
 AM_CXXFLAGS = $(NIX_CFLAGS) -std=c++11 -I$(srcdir)/include -I$(srcdir)/src \
   -D NIXEXEC_DATA_DIR=\"$(datadir)\" -D NIXEXEC_PREFIX=\"$(prefix)\" \
-  -Wall -Wextra
+  -Wall -Wextra -O3
 
 pkglib_LTLIBRARIES = librunio.la
 
@@ -21,16 +21,22 @@ nixplugin_LTLIBRARIES = libunsafeperformio.la
 libunsafeperformio_la_SOURCES = src/unsafe-perform-io.cc src/run-io.hh
 libunsafeperformio_la_LIBADD = librunio.la
 
-EXTRA_DIST=LICENSE README.md nix/unsafe-perform-io.nix.in nix/lib.nix.in
+nixexecplugindir = $(libdir)/nix-exec-plugins
+nixexecplugin_LTLIBRARIES = libfetchgit.la
+libfetchgit_la_SOURCES = src/fetchgit.cc
+libfetchgit_la_CXXFLAGS = $(AM_CXXFLAGS) -D NIXEXEC_LIBEXEC_DIR=\"$(libexecdir)\"
 
-SED = sed
+nodist_libexec_SCRIPTS = scripts/fetchgit.sh
+
+EXTRA_DIST=LICENSE README.md nix/unsafe-perform-io.nix.in nix/lib.nix.in scripts/fetchgit.sh.in
 
 SUFFIXES = .in
 
 .in:
 	echo $(PACKAGE_VERSION) | (IFS=. read -r major minor patchlevel; \
-	$(SED) \
+	$(sed) \
 		-e 's,[@]nixplugindir[@],$(nixplugindir),g' \
+		-e 's,[@]nixexecplugindir[@],$(nixexecplugindir),g' \
 		-e 's,[@]prefix[@],$(prefix),g' \
 		-e 's,[@]datadir[@],$(datadir),g' \
 		-e 's,[@]version_major[@],'"$$major"',g' \

@@ -1,4 +1,4 @@
-{
+rec {
   unit = a: { inherit a; type = "io"; subtype = "unit"; };
 
   join = mma: { inherit mma; type = "io"; subtype = "join"; };
@@ -23,5 +23,9 @@
 
       patchlevel = @version_patchlevel@;
     };
+  };
+
+  builtins = {
+    fetchgit = dlopen @nixexecplugindir@/libfetchgit.so "fetchgit" 1;
   };
 }

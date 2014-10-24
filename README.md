@@ -89,6 +89,23 @@ of `nix-exec`:
 * `version.minor`: The minor version number
 * `version.patchlevel`: The version patchlevel.
 
+fetchgit
+---------
+
+For bootstrapping purposes, the `builtins` attribute in the `nix-exec` lib
+is a set whose `fetchgit` attribute is a function that takes a set with the
+following arguments:
+
+* `url`: The URL of the repository
+* `rev`: The desired revision
+* `fetchSubmodules`: Whether to fetch submodules (default `true`)
+* `cache-dir`: The directory to cache repos and archives in (default
+  `$HOME/.cache/fetchgit`).
+
+When called, `fetchgit` returns an IO value that, when run, checks out
+the given revision of the given git repository into a directory and yields a
+`path` pointing to that directory.
+
 Global symbols
 --------------
 

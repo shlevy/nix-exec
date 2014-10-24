@@ -1,0 +1,98 @@
+#!@sh@ -e
+
+do_submodules() {
+	repo="$1"
+	rev="$2"
+	dir="$3"
+
+	submodules=$(
+		'@git@' config -zf "$dir"/.gitmodules --get-regexp '^submodule.*.path' | \
+		'@sed@' -e 's|^[^\x0]*\x0||g' -e 's|^submodule\.\(.*\)\.path$|\1|g' \
+	)
+	(
+	if [ -z "${IFS+x}" ]; then
+		IFSUNSET=1
+	else
+		unset -v IFSUNSET
+	fi
+	OLDIFS="$IFS"
+	IFS="
+"
+	for submodule in $submodules; do
+		if [ -n "$IFSUNSET" ]; then
+			unset -v IFS
+		else
+			IFS="$OLDIFS"
+		fi
+		path=$('@git@' config -f "$dir"/.gitmodules --get submodule."$submodule".path)
+		subrev=$('@git@' --git-dir="$repo" ls-tree "$rev"^{tree} "$path" | '@cut@' -f 3 -d ' ' | '@cut@' -f 1)
+		subrepo=$('@git@' config -f "$dir"/.gitmodules --get submodule."$submodule".url)
+		submodules=$('@git@' config -f "$dir"/.gitmodules --get submodule."$submodule".fetchRecurseSubmodules || '@printf@' "true\n")
+		subarchive=$("$0" "$cache" "$subrepo" "$subrev" "$submodules")
+		'@rmdir@' "$dir"/"$path"
+		'@cp@' -RPp "$subarchive" "$dir"/"$path"
+	done
+	)
+}
+
+do_archive() {
+	repo="$1"
+	rev="$2"
+	submodules="$3"
+	archive="$4"
+
+	dir=$('@mktemp@' -d "$archive".XXXXXX)
+	'@chmod@' 0755 "$dir"
+	'@git@' --git-dir="$repo" archive --format=tar "$rev" |
+		'@tar@' -x -C "$dir"
+
+	if [ "$submodules" = "true" -a -f "$dir"/.gitmodules ]; then
+		do_submodules "$repo" "$rev" "$dir"
+	fi
+
+	'@chmod@' -w -R "$dir"
+	'@sync@'
+	if ! '@mv@' -T "$dir" "$archive"; then
+		[ -d "$dir" ];
+	fi
+}
+
+cache="$1"
+url="$2"
+ish="$3"
+submodules="$4"
+
+base=$('@basename@' "$url")
+base=${base%.git}
+
+repo="$cache"/repos/"$base"
+'@mkdir@' -p $('@dirname@' "$repo")
+'@git@' --git-dir="$repo" init --bare &>/dev/null
+ty=$('@git@' --git-dir="$repo" cat-file -t "$ish" 2>/dev/null || '@printf@' "")
+if [ "$ty" != "commit" ]; then
+	# Try fetching directly (maybe it's a tag?)
+	'@git@' --git-dir="$repo" fetch "$url" "$ish" || true
+	ty=$('@git@' --git-dir="$repo" cat-file -t "$ish" 2>/dev/null || '@printf@' "")
+	if [ "$ty" != "commit" ]; then
+		# Try fetching without tags
+		'@git@' --git-dir="$repo" fetch "$url"
+		ty=$('@git@' --git-dir="$repo" cat-file -t "$ish" 2>/dev/null || '@printf@' "")
+		if [ "$ty" != "commit" ]; then
+			# Fetch everything
+			'@git@' --git-dir="$repo" fetch --tags "$url"
+			ty=$('@git@' --git-dir="$repo" cat-file -t "$ish")
+			if [ "$ty" != "commit" ]; then
+				'@printf@' "$rev is not a commit (it is a $ty)" >&2
+				exit 1
+			fi
+		fi
+	fi
+fi
+rev=$('@git@' --git-dir="$repo" rev-parse "$ish")
+
+archive="$cache"/archives/"$base"/"$submodules"/"$rev"/"$base"
+if [ ! -d "$archive" ]; then
+	'@mkdir@' -p $('@dirname@' "$archive")
+	do_archive "$repo" "$rev" "$submodules" "$archive"
+fi
+'@printf@' "$archive"
