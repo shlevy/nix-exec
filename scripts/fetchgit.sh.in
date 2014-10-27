@@ -74,17 +74,12 @@ if [ "$ty" != "commit" ]; then
 	'@git@' --git-dir="$repo" fetch "$url" "$ish" || true
 	ty=$('@git@' --git-dir="$repo" cat-file -t "$ish" 2>/dev/null || '@printf@' "")
 	if [ "$ty" != "commit" ]; then
-		# Try fetching without tags
-		'@git@' --git-dir="$repo" fetch "$url"
-		ty=$('@git@' --git-dir="$repo" cat-file -t "$ish" 2>/dev/null || '@printf@' "")
+		# OK, fetch everything
+		'@git@' --git-dir="$repo" fetch "$url" '+refs/heads/*:refs/remotes/origin/*' --tags
+		ty=$('@git@' --git-dir="$repo" cat-file -t "$ish")
 		if [ "$ty" != "commit" ]; then
-			# Fetch everything
-			'@git@' --git-dir="$repo" fetch --tags "$url"
-			ty=$('@git@' --git-dir="$repo" cat-file -t "$ish")
-			if [ "$ty" != "commit" ]; then
-				'@printf@' "$rev is not a commit (it is a $ty)" >&2
-				exit 1
-			fi
+			'@printf@' "$rev is not a commit (it is a $ty)" >&2
+			exit 1
 		fi
 	fi
 fi
