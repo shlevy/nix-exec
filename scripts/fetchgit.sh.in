@@ -50,9 +50,10 @@ do_archive() {
 		do_submodules "$repo" "$rev" "$dir"
 	fi
 
-	'@chmod@' -w -R "$dir"
 	'@sync@'
-	if ! '@mv@' -T "$dir" "$archive"; then
+	if '@mv@' -T "$dir" "$archive"; then
+		'@chmod@' -w -R "$archive"
+	else
 		[ -d "$dir" ];
 	fi
 }
