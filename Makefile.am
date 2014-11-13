@@ -39,6 +39,7 @@ SUFFIXES = .in
 		-e 's,[@]nixexecplugindir[@],$(nixexecplugindir),g' \
 		-e 's,[@]prefix[@],$(prefix),g' \
 		-e 's,[@]datadir[@],$(datadir),g' \
+		-e 's,[@]SHREXT[@],'"$(SHREXT)"',g' \
 		-e 's,[@]version_major[@],'"$$major"',g' \
 		-e 's,[@]version_minor[@],'"$$minor"',g' \
 		-e 's,[@]version_patchlevel[@],'"$$patchlevel"',g' \

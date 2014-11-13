@@ -1,1 +1,1 @@
-builtins.importNative @nixplugindir@/libunsafeperformio.so "init"
+builtins.importNative @nixplugindir@/libunsafeperformio@SHREXT@ "init"

@@ -31,6 +31,8 @@ AC_PATH_PROG([awk], awk, awk)
 AC_PATH_PROG([sh], sh, sh)
 AC_PATH_PROG([mkdir], mkdir, mkdir)
 
+AC_SUBST([SHREXT], ["$shrext_cmds"])
+
 AC_CONFIG_FILES([Makefile scripts/fetchgit.sh])
 
 AC_OUTPUT
