@@ -26,6 +26,6 @@ rec {
   };
 
   builtins = {
-    fetchgit = dlopen @nixexecplugindir@/libfetchgit.so "fetchgit" 1;
+    fetchgit = dlopen @nixexecplugindir@/libfetchgit@SHREXT@ "fetchgit" 1;
   };
 }
