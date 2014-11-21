@@ -158,6 +158,7 @@ static void unsafe( nix::EvalState & state
                   , nix::Value & v
                   ) {
   run_io(state, args[0], &pos, v);
+  state.forceValue(v);
 }
 
 void setup_unsafe_perform_io(nix::EvalState & state, nix::Value & v) {
