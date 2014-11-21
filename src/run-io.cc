@@ -164,6 +164,6 @@ void setup_unsafe_perform_io(nix::EvalState & state, nix::Value & v) {
   v.type = nix::tPrimOp;
   v.primOp = NEW nix::PrimOp( unsafe
                             , 1
-                            , state.symbols.create("unsafePerformIO")
+                            , state.symbols.create("unsafe-perform-io")
                             );
 }
