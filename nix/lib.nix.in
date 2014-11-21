@@ -1,4 +1,4 @@
-rec {
+unsafe-perform-io: rec {
   unit = a: { inherit a; type = "io"; subtype = "unit"; };
 
   join = mma: { inherit mma; type = "io"; subtype = "join"; };
@@ -27,5 +27,7 @@ rec {
 
   builtins = {
     fetchgit = dlopen @nixexecplugindir@/libfetchgit@SHREXT@ "fetchgit" 1;
+
+    inherit unsafe-perform-io;
   };
 }

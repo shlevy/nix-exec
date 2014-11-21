@@ -1,17 +1,4 @@
 /* Work around nix's config.h */
-#undef PACKAGE_NAME
-#undef PACKAGE_STRING
-#undef PACKAGE_TARNAME
-#undef PACKAGE_VERSION
-#include <eval.hh>
-
-#if HAVE_BOEHMGC
-#include <gc/gc_cpp.h>
-#define NEW new (UseGC)
-#else
-#define NEW new
-#endif
-
 #include "run-io.hh"
 
 static void unsafe( nix::EvalState & state
@@ -23,6 +10,5 @@ static void unsafe( nix::EvalState & state
 }
 
 extern "C" void init(nix::EvalState & state, nix::Value & v) {
-  v.type = nix::tPrimOp;
-  v.primOp = NEW nix::PrimOp(unsafe, 1, state.symbols.create("unsafePerformIO"));
+  setup_unsafe_perform_io(state, v);
 }

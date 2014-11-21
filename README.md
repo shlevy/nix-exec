@@ -129,7 +129,8 @@ result. This uses `builtins.importNative` under the hood, so it requires the
 `allow-unsafe-native-code-during-evaluation` nix option to be set to true.
 
 Import `$(datadir)/nix/lib.nix` for access to the `nix-exec` lib when running
-outside of a `nix-exec` invocation.
+outside of a `nix-exec` invocation. You must psas `unsafe-perform-io` to
+`lib.nix`.
 
 Note that when using `unsafe-perform-io.nix`, `nixexec_argc` will be `0` and
 `nixexec_argv` will be `NULL` unless called within an actual `nix-exec`

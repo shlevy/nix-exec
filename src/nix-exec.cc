@@ -27,7 +27,13 @@ static void setup_args(nix::EvalState & state, nix::Value & args, nix::Strings::
 static void setup_lib(nix::EvalState & state, nix::Value & lib) {
   auto expr = state.parseExprFromFile(NIXEXEC_DATA_DIR "/nix/lib.nix");
 
-  state.eval(expr, lib);
+  auto libfn = state.allocValue();
+  state.eval(expr, *libfn);
+
+  auto unsafe = state.allocValue();
+  setup_unsafe_perform_io(state, *unsafe);
+
+  nix::mkApp(lib, *libfn, *unsafe);
 }
 
 static void run() {
