@@ -90,6 +90,7 @@ void run_io(nix::EvalState & state, nix::Value * io_val, const nix::Pos * pos, n
 
         io_val = a_attr->value;
         pos = a_attr->pos;
+        state.forceValue(*io_val);
       } else if (subtype == "dlopen") {
         auto filename_attr = io_val->attrs->find(filename_sym);
         if (filename_attr == io_val->attrs->end())
@@ -158,7 +159,6 @@ static void unsafe( nix::EvalState & state
                   , nix::Value & v
                   ) {
   run_io(state, args[0], &pos, v);
-  state.forceValue(v);
 }
 
 void setup_unsafe_perform_io(nix::EvalState & state, nix::Value & v) {

@@ -1,4 +1,4 @@
-AC_INIT([nix-exec], [3.0.1])
+AC_INIT([nix-exec], [3.0.2])
 
 LT_INIT([disable-static])
 
