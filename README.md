@@ -76,6 +76,9 @@ defined in `<nix/eval.hh>`.
 The `filename` argument can be the result of a derivation, in which case
 `nix-exec` will build the derivation before trying to dynamically load it.
 
+Note that the `PrimOpFun` must return a value that is properly forced, i.e.
+not a thunk or an un-called function application.
+
 Configuration settings
 -----------------------
 
