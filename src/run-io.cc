@@ -47,54 +47,53 @@ void run_io(nix::EvalState & state, nix::Value * io_val, const nix::Pos * pos, n
 
     auto type_attr = io_val->attrs->find(state.sType);
     if (type_attr == io_val->attrs->end())
-      throw nix::EvalError(format("attempted to run value of non-io type, at %1%") % pos);
+      throw nix::EvalError(format("attempted to run value of non-io type, at %1%") % *pos);
     auto type = state.forceStringNoCtx(*type_attr->value, *type_attr->pos);
     if (type != "io")
       throw nix::EvalError(format("attempted to run value of non-io type `%1%', at %2%")
-          % type % pos);
+          % type % *pos);
 
     auto subtype_attr = io_val->attrs->find(subtype_sym);
     if (subtype_attr == io_val->attrs->end())
-      throw nix::EvalError(format(invalid_io_message) % pos);
+      throw nix::EvalError(format(invalid_io_message) % *pos);
     auto subtype = state.forceStringNoCtx(*subtype_attr->value, *subtype_attr->pos);
 
     if (subtype == "join") {
       auto mma_attr = io_val->attrs->find(mma_sym);
       if (mma_attr == io_val->attrs->end())
-        throw nix::EvalError(format(invalid_io_message) % pos);
+        throw nix::EvalError(format(invalid_io_message) % *pos);
 
       io_val = mma_attr->value;
-      pos = mma_attr->pos;
       ++m_level;
       fn_stack.push(nullptr);
     } else if (subtype == "map") {
       auto f_attr = io_val->attrs->find(f_sym);
       if (f_attr == io_val->attrs->end())
-        throw nix::EvalError(format(invalid_io_message) % pos);
+        throw nix::EvalError(format(invalid_io_message) % *pos);
 
       auto ma_attr = io_val->attrs->find(ma_sym);
       if (ma_attr == io_val->attrs->end())
-        throw nix::EvalError(format(invalid_io_message) % pos);
+        throw nix::EvalError(format(invalid_io_message) % *pos);
 
       state.forceFunction(*f_attr->value, *f_attr->pos);
 
       fn_stack.push(f_attr->value);
 
       io_val = ma_attr->value;
-      pos = ma_attr->pos;
+      if (f_attr->value->type == nix::tLambda)
+        pos = &f_attr->value->lambda.fun->pos;
     } else {
       if (subtype == "unit") {
         auto a_attr = io_val->attrs->find(a_sym);
         if (a_attr == io_val->attrs->end())
-          throw nix::EvalError(format(invalid_io_message) % pos);
+          throw nix::EvalError(format(invalid_io_message) % *pos);
 
         io_val = a_attr->value;
-        pos = a_attr->pos;
         state.forceValue(*io_val);
       } else if (subtype == "dlopen") {
         auto filename_attr = io_val->attrs->find(filename_sym);
         if (filename_attr == io_val->attrs->end())
-          throw nix::EvalError(format(invalid_io_message) % pos);
+          throw nix::EvalError(format(invalid_io_message) % *pos);
 
         auto ctx = nix::PathSet{};
         auto filename = state.coerceToString(*filename_attr->pos,
@@ -112,7 +111,7 @@ void run_io(nix::EvalState & state, nix::Value * io_val, const nix::Pos * pos, n
 
         auto symbol_attr = io_val->attrs->find(symbol_sym);
         if (symbol_attr == io_val->attrs->end())
-          throw nix::EvalError(format(invalid_io_message) % pos);
+          throw nix::EvalError(format(invalid_io_message) % *pos);
 
         auto symbol = state.forceStringNoCtx(*symbol_attr->value, *symbol_attr->pos);
 
@@ -124,20 +123,22 @@ void run_io(nix::EvalState & state, nix::Value * io_val, const nix::Pos * pos, n
 
         auto args_attr = io_val->attrs->find(args_sym);
         if (args_attr == io_val->attrs->end())
-          throw nix::EvalError(format(invalid_io_message) % pos);
+          throw nix::EvalError(format(invalid_io_message) % *pos);
 
         state.forceValue(*args_attr->value);
         if (args_attr->value->type != nix::tList)
-          throw nix::EvalError(format(invalid_io_message) % pos);
+          throw nix::EvalError(format(invalid_io_message) % *pos);
 
         io_val = state.allocValue();
 
         fn(state, *pos, args_attr->value->list.elems, *io_val);
       } else {
-        throw nix::EvalError(format(invalid_io_message) % pos);
+        throw nix::EvalError(format(invalid_io_message) % *pos);
       }
 
       while (auto fn = fn_stack.top()) {
+	if (fn->type == nix::tLambda)
+          pos = &fn->lambda.fun->pos;
         auto v = state.allocValue();
         state.callFunction(*fn, *io_val, *v, *pos);
         io_val = v;

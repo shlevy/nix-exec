@@ -100,8 +100,11 @@ static void run() {
   auto result = state.allocValue();
   state.callFunction(*fn, *fn_args, *result, top_pos);
 
+  auto fn_pos = fn->type == nix::tLambda
+    ? &fn->lambda.fun->pos
+    : &top_pos;
   nix::Value v;
-  run_io(state, result, &top_pos, v);
+  run_io(state, result, fn_pos, v);
 }
 
 int main(int argc, char ** argv) {
