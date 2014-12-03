@@ -1,1 +1,0 @@
-builtins.importNative @nixplugindir@/libunsafeperformio@SHREXT@ "init"

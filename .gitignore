@@ -15,12 +15,12 @@ ltmain.sh
 .deps
 .dirstamp
 .libs
+ar-lib
 *.o
 *.lo
 *.la
 
-nix/unsafe-perform-io.nix
-nix/lib.nix
+nix/unsafe-lib.nix
 
 scripts/fetchgit.sh
 

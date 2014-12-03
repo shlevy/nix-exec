@@ -1,8 +1,10 @@
-AC_INIT([nix-exec], [3.0.2])
-
-LT_INIT([disable-static])
+AC_INIT([nix-exec], [4.0.0])
 
 AM_INIT_AUTOMAKE([foreign -Wall subdir-objects dist-xz no-dist-gzip])
+
+AM_PROG_AR
+
+LT_INIT([disable-static])
 
 AC_CONFIG_SRCDIR([LICENSE])
 

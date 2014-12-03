@@ -10,7 +10,7 @@
 #include <store-api.hh>
 #include <globals.hh>
 
-#include "run-io.hh"
+#include "nix-exec.hh"
 
 static void setup_args(nix::EvalState & state, nix::Value & args, nix::Strings::difference_type arg_count) {
   state.mkList(args, arg_count);
@@ -22,18 +22,6 @@ static void setup_args(nix::EvalState & state, nix::Value & args, nix::Strings::
     ++elem;
     ++argv;
   } while (--arg_count);
-}
-
-static void setup_lib(nix::EvalState & state, nix::Value & lib) {
-  auto expr = state.parseExprFromFile(NIXEXEC_DATA_DIR "/nix/lib.nix");
-
-  auto libfn = state.allocValue();
-  state.eval(expr, *libfn);
-
-  auto unsafe = state.allocValue();
-  setup_unsafe_perform_io(state, *unsafe);
-
-  nix::mkApp(lib, *libfn, *unsafe);
 }
 
 static void run() {
@@ -77,32 +65,32 @@ static void run() {
 
   auto expr = state.parseExprFromFile(nix::lookupFileArg(state, expr_path));
 
-  auto fn = state.allocValue();
+  auto & fn = *state.allocValue();
 
-  state.eval(expr, *fn);
+  state.eval(expr, fn);
 
   auto top_pos = nix::Pos{state.symbols.create(expr_path), 1, 1};
 
-  state.forceFunction(*fn, top_pos);
+  state.forceFunction(fn, top_pos);
 
-  auto fn_args = state.allocValue();
+  auto & fn_args = *state.allocValue();
 
-  state.mkAttrs(*fn_args, 2);
+  state.mkAttrs(fn_args, 2);
 
-  auto args = state.allocAttr(*fn_args, state.symbols.create("args"));
-  setup_args(state, *args, arg_count);
+  auto & args = *state.allocAttr(fn_args, state.symbols.create("args"));
+  setup_args(state, args, arg_count);
 
-  auto lib = state.allocAttr(*fn_args, state.symbols.create("lib"));
-  setup_lib(state, *lib);
+  auto & lib = *state.allocAttr(fn_args, state.symbols.create("lib"));
+  setup_lib(state, lib);
 
-  fn_args->attrs->sort();
+  fn_args.attrs->sort();
 
-  auto result = state.allocValue();
-  state.callFunction(*fn, *fn_args, *result, top_pos);
+  auto & result = *state.allocValue();
+  state.callFunction(fn, fn_args, result, top_pos);
 
-  auto fn_pos = fn->type == nix::tLambda
-    ? &fn->lambda.fun->pos
-    : &top_pos;
+  auto & fn_pos = fn.type == nix::tLambda
+    ? fn.lambda.fun->pos
+    : top_pos;
   nix::Value v;
   run_io(state, result, fn_pos, v);
 }

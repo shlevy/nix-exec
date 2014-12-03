@@ -21,10 +21,9 @@ using nix::EvalError;
 using nix::SysError;
 using nix::Error;
 using nix::Value;
-using nix::PathSet;
 using nix::Path;
 
-static nix::Path get_default_cache_dir() {
+static Path get_default_cache_dir() {
   auto home = ::getenv("HOME");
   if (!home) {
     errno = 0;
@@ -35,7 +34,7 @@ static nix::Path get_default_cache_dir() {
       throw SysError("getting password file entry for current user");
   }
 
-  return home ? nix::Path{home} + "/.cache/fetchgit" : "/var/lib/empty/.cache/fetchgit";
+  return home ? Path{home} + "/.cache/fetchgit" : "/var/lib/empty/.cache/fetchgit";
 }
 
 extern "C" void fetchgit( nix::EvalState & state
@@ -53,7 +52,7 @@ extern "C" void fetchgit( nix::EvalState & state
   state.forceAttrs(*args[0]);
 
   auto cache_iter = args[0]->attrs->find(cache_sym);
-  auto context = PathSet{};
+  auto context = nix::PathSet{};
   auto cache_dir = cache_iter == args[0]->attrs->end() ?
     default_cache_dir :
     state.coerceToPath(*cache_iter->pos, *cache_iter->value, context);
