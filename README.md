@@ -60,18 +60,13 @@ dlopen
 -------
 
 In addition, the `nix-exec` `lib` argument contains a `dlopen` function to
-allow native code to be executed when running the `IO` value. `dlopen` is
-a variable-argument function: It always takes a `filename`, `symbol`, and
-`arity` argument, and then takes as many arguments as specified in the
-`arity` argument and returns a monadic value. For example,
-`dlopen ./foo.so "fun" 1 true` is a monadic value while
-`dlopen ./bar.so "other_fun" 2 null` is a function from a value to a
-monadic value.
+allow native code to be executed when running the `IO` value. `dlopen` takes
+three arguments, `filename`, `symbol`, and `args`.
 
 When running a monadic value resulting from a call `dlopen`, `nix-exec` will
 dynamically load the file at `filename`, load a `nix::PrimOpFun` from the DSO
-at symbol `symbol`, and pass the arguments to the `PrimOpFun`. `PrimOpFun` is
-defined in `<nix/eval.hh>`.
+at symbol `symbol`, and pass the values in the `args list to the `PrimOpFun`.
+`PrimOpFun` is defined in `<nix/eval.hh>`.
 
 The `filename` argument can be the result of a derivation, in which case
 `nix-exec` will build the derivation before trying to dynamically load it.
@@ -92,11 +87,19 @@ of `nix-exec`:
 * `version.minor`: The minor version number
 * `version.patchlevel`: The version patchlevel.
 
+unsafe-perform-io
+------------------
+
+The `builtins` attribute in the `nix-exec` lib contains contains an
+`unsafe-perform-io` attribute that is a function that takes an IO value, runs
+it, and returns the produced value. It has largely similar pitfalls to Haskell's
+`unsafePerformIO` function.
+
 fetchgit
 ---------
 
 For bootstrapping purposes, the `builtins` attribute in the `nix-exec` lib
-is a set whose `fetchgit` attribute is a function that takes a set with the
+contains a `fetchgit` attribute that is a function that takes a set with the
 following arguments:
 
 * `url`: The URL of the repository
@@ -121,21 +124,17 @@ Global symbols
 In addition, symbols defined in `libnixmain`, `libnixexpr`, and `libnixstore`
 are all available.
 
-unsafe-perform-io.nix
-----------------------
+unsafe-lib.nix
+----------------
 
 For cases where the expression author doesn't completely control the invocation
 of the evaluator (e.g. `nixops` has no way to specify that it should run
-`nix-exec`), `nix-exec` installs `unsafe-perform-io.nix` in `$(datadir)/nix`.
-This evaluates to a function which takes an IO value, runs it, and returns the
-result. This uses `builtins.importNative` under the hood, so it requires the
+`nix-exec`), `nix-exec` installs `unsafe-lib.nix` in `$(datadir)/nix`. Importing
+this file evaluates to the `lib` set passed to normal `nix-exec` programs. This
+uses `builtins.importNative` under the hood, so it requires the
 `allow-unsafe-native-code-during-evaluation` nix option to be set to true.
 
-Import `$(datadir)/nix/lib.nix` for access to the `nix-exec` lib when running
-outside of a `nix-exec` invocation. You must psas `unsafe-perform-io` to
-`lib.nix`.
-
-Note that when using `unsafe-perform-io.nix`, `nixexec_argc` will be `0` and
+Note that when using `unsafe-lib.nix`, `nixexec_argc` will be `0` and
 `nixexec_argv` will be `NULL` unless called within an actual `nix-exec`
 invocation.
 
@@ -176,7 +175,7 @@ This prints out the arguments passed to it, one per line:
     strip -S $out
   '';
 
-  printArgs = lib.dlopen print-args-so "print" 1;
+  printArgs = args: lib.dlopen print-args-so "print" [ args ];
 in printArgs args
 ```
 
