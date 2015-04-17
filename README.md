@@ -66,7 +66,7 @@ three arguments, `filename`, `symbol`, and `args`.
 When running a monadic value resulting from a call `dlopen`, `nix-exec` will
 dynamically load the file at `filename`, load a `nix::PrimOpFun` from the DSO
 at symbol `symbol`, and pass the values in the `args list to the `PrimOpFun`.
-`PrimOpFun` is defined in `<nix/eval.hh>`.
+`PrimOpFun` is defined in `nix/eval.hh`.
 
 The `filename` argument can be the result of a derivation, in which case
 `nix-exec` will build the derivation before trying to dynamically load it.
