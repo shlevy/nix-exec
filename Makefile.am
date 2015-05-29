@@ -18,9 +18,12 @@ nixlibdir = $(datadir)/nix
 nodist_nixlib_DATA = nix/unsafe-lib.nix
 
 nixexecplugindir = $(libdir)/nix-exec-plugins
-nixexecplugin_LTLIBRARIES = libfetchgit.la
+nixexecplugin_LTLIBRARIES = libfetchgit.la libreexec.la
+
 libfetchgit_la_SOURCES = src/fetchgit.cc
 libfetchgit_la_CXXFLAGS = $(AM_CXXFLAGS) -D NIXEXEC_LIBEXEC_DIR=\"$(libexecdir)\"
+
+libreexec_la_SOURCES = src/reexec.cc
 
 nodist_libexec_SCRIPTS = scripts/fetchgit.sh
 

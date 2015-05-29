@@ -26,6 +26,7 @@ static void setup_args(nix::EvalState & state, nix::Value & args, nix::Strings::
 
 static void run() {
   nix::initNix();
+  nix::initGC();
 
   auto search_path = nix::Strings{};
   auto arg_count = nix::Strings::difference_type{0};

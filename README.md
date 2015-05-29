@@ -112,6 +112,18 @@ When called, `fetchgit` returns an IO value that, when run, checks out
 the given revision of the given git repository into a directory and yields a
 `path` pointing to that directory.
 
+reexec
+-------
+
+For bootstrapping purposes, the `builtins` attribute in the `nix-exec` lib
+contains a `reexec` attribute that is a function that takes a path to a
+`nix-exec` binary and returns an IO value that, when run, reexecutes itself with
+the passed in path if and only if the path is different than how `nix-exec` was
+originally executed, and yields null otherwise. This allows the use of a fixed
+version of `nix-exec` and its dependencies (especially `nix`), though of course
+the path to `nix-exec` itself must be evaluatable with the host version of
+`nix-exec`.
+
 Global symbols
 --------------
 
