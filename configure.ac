@@ -1,4 +1,4 @@
-AC_INIT([nix-exec], [4.1.1])
+AC_INIT([nix-exec], [4.1.2])
 
 AM_INIT_AUTOMAKE([foreign -Wall subdir-objects dist-xz no-dist-gzip])
 

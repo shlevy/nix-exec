@@ -52,7 +52,7 @@ do_archive() {
 
 	'@sync@'
 	if '@mv@' -T "$dir" "$archive"; then
-		'@chmod@' -w -R "$archive"
+		'@chmod@' a-w -R "$archive"
 	else
 		[ -d "$dir" ];
 	fi
