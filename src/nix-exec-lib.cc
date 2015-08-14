@@ -280,7 +280,7 @@ class dlopen_value : public io_value {
         throw nix::EvalError(format("could not load symbol `%1%' from `%2%': %3%") % symbol % filename % err);
 
       state.forceList(args, pos);
-      fn(state, pos, args.list.elems, arg);
+      fn(state, pos, args.listElems(), arg);
     }
     if (fns.empty()) {
       v = arg;

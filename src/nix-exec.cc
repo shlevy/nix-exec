@@ -14,7 +14,7 @@
 
 static void setup_args(nix::EvalState & state, nix::Value & args, nix::Strings::difference_type arg_count) {
   state.mkList(args, arg_count);
-  auto elem = args.list.elems;
+  auto elem = args.listElems();
   auto argv = nixexec_argv + (nixexec_argc - arg_count);
   do {
     *elem = state.allocValue();
