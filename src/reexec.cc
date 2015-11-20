@@ -41,8 +41,10 @@ extern "C" void reexec( nix::EvalState & state
         % filename % e.path % pos);
     }
     /* const_cast legal because execvp respects constness */
+    auto old_argv0 = nixexec_argv[0];
     nixexec_argv[0] = const_cast<char *>(filename.c_str());
     execvp(nixexec_argv[0], nixexec_argv);
+    nixexec_argv[0] = old_argv0;
     throw nix::SysError(format("executing `%1%'") % filename);
   }
 }
