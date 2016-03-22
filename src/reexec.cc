@@ -35,7 +35,7 @@ extern "C" void reexec( nix::EvalState & state
     v.type = nix::tNull;
   } else {
     try {
-      nix::realiseContext(ctx);
+      state.realiseContext(ctx);
     } catch (nix::InvalidPathError & e) {
       throw nix::EvalError(format("cannot exec `%1%', since path `%2%' is not valid, at %3%")
         % filename % e.path % pos);

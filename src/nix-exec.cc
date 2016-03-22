@@ -58,9 +58,8 @@ static void run() {
   if (arg_count == 0)
     throw nix::UsageError("No file given");
 
-  auto state = nix::EvalState{search_path};
-
-  nix::store = nix::openStore();
+  auto store = nix::openStore();
+  auto state = nix::EvalState{search_path, store};
 
   auto expr_path = nixexec_argv[nixexec_argc - arg_count];
 

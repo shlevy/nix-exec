@@ -12,7 +12,6 @@ extern "C" {
 #undef PACKAGE_VERSION
 #include <eval.hh>
 #include <store-api.hh>
-#include <misc.hh>
 #include <eval-inline.hh>
 #include <globals.hh>
 
@@ -262,7 +261,7 @@ class dlopen_value : public io_value {
                                           , false
 					  );
       try {
-        nix::realiseContext(ctx);
+        state.realiseContext(ctx);
       } catch (nix::InvalidPathError & e) {
         throw nix::EvalError(format("cannot dlopen `%1%', since path `%2%' is not valid, at %3%")
           % filename % e.path % pos);
