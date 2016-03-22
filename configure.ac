@@ -1,4 +1,4 @@
-AC_INIT([nix-exec], [4.1.3])
+AC_INIT([nix-exec], m4_normalize(esyscmd(git describe --tags | cut -c 2-)))
 
 AM_INIT_AUTOMAKE([foreign -Wall subdir-objects dist-xz no-dist-gzip])
 
