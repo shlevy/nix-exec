@@ -86,6 +86,7 @@ of `nix-exec`:
 * `version.major`: The major version number
 * `version.minor`: The minor version number
 * `version.patchlevel`: The version patchlevel.
+* `version.prelevel`: If present, the version pre-release level
 
 unsafe-perform-io
 ------------------

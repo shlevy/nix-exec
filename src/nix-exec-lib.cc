@@ -351,9 +351,10 @@ struct exploded_version {
   nix::NixInt major;
   nix::NixInt minor;
   nix::NixInt patch;
+  size_t pre_off;
 };
 
-enum class acc_tag : char { major, minor, patch };
+enum class acc_tag { major, minor, patch };
 
 static constexpr nix::NixInt char_to_digit(char c) {
   return c == '0' ?
@@ -391,7 +392,7 @@ template <size_t N> static constexpr
       (str[off] == '.' ?
         explode_version_impl( str
                             , off + 1
-                            , exploded_version{acc.major, 0, -1}
+                            , exploded_version{acc.major, 0, -1, 0}
                             , acc_tag::minor
                             ) :
         explode_version_impl( str
@@ -401,6 +402,7 @@ template <size_t N> static constexpr
                                                 )
                                               , -1
                                               , -1
+                                              , 0
                                               }
                             , tag
                             )
@@ -409,7 +411,7 @@ template <size_t N> static constexpr
       (str[off] == '.' ?
         explode_version_impl( str
                             , off + 1
-                            , exploded_version{acc.major, acc.minor, 0}
+                            , exploded_version{acc.major, acc.minor, 0, 0}
                             , acc_tag::patch
                             ) :
         explode_version_impl( str
@@ -419,27 +421,36 @@ template <size_t N> static constexpr
                                                   str[off]
                                                 )
                                               , -1
+                                              , 0
                                               }
                             , tag
                             )
       ) :
     (tag == acc_tag::patch ?
-      (off + 2 == N ?
+      (str[off] == '-' ?
         exploded_version{ acc.major
                         , acc.minor
-                        , 10 * acc.patch + char_to_digit(str[off])
+                        , acc.patch
+                        , off
                         } :
-        explode_version_impl( str
-                            , off + 1
-                            , exploded_version{ acc.major
-                                              , acc.minor
-                                              , 10 * acc.patch + char_to_digit(
-                                                  str[off]
-                                                )
-                                              }
-                            , tag
-                            )
-      ) :
+        (off + 2 == N ?
+          exploded_version{ acc.major
+                          , acc.minor
+                          , 10 * acc.patch + char_to_digit(str[off])
+                          , 0
+                          } :
+          explode_version_impl( str
+                              , off + 1
+                              , exploded_version{ acc.major
+                                                , acc.minor
+                                                , 10 * acc.patch + char_to_digit(
+                                                    str[off]
+                                                  )
+                                                , 0
+                                                }
+                              , tag
+                              )
+        )) :
       throw std::domain_error("internal error")
     ))) :
     throw std::out_of_range("not enough dots in version");
@@ -449,13 +460,13 @@ template <size_t N>
   static constexpr exploded_version explode_version(const char(&str)[N]) {
   return explode_version_impl( str
                              , 0
-                             , exploded_version{0, -1, -1}
+                             , exploded_version{0, -1, -1, 0}
                              , acc_tag::major
                              );
 }
 
 static void setup_version(EvalState & state, Value & v) {
-  state.mkAttrs(v, 3);
+  state.mkAttrs(v, 4);
 
   constexpr auto version = explode_version(VERSION);
   static_assert(  version.major > 0
@@ -463,6 +474,8 @@ static void setup_version(EvalState & state, Value & v) {
                && version.patch != -1
                , "invalid exploded version"
                );
+
+  state.mkAttrs(v, version.pre_off == 0 ? 3 : 4);
 
   auto & major = *state.allocAttr(v, state.symbols.create("major"));
   mkInt(major, version.major);
@@ -472,6 +485,11 @@ static void setup_version(EvalState & state, Value & v) {
 
   auto & patch = *state.allocAttr(v, state.symbols.create("patchlevel"));
   mkInt(patch, version.patch);
+
+  if (version.pre_off != 0) {
+    auto & pre = *state.allocAttr(v, state.symbols.create("prelevel"));
+    mkStringNoCopy(pre, VERSION + version.pre_off + 1);
+  }
 
   v.attrs->sort();
 }
