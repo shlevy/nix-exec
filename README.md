@@ -157,7 +157,7 @@ The `nix::PrimOpFun` API is not necessarily stable from version to version of
 `nix`. As such, scripts should inspect `builtins.nixVersion` to ensure that
 loaded dynamic objects are compatible.
 
-Example
+Examples
 -------
 
 This prints out the arguments passed to it, one per line:
@@ -189,6 +189,31 @@ This prints out the arguments passed to it, one per line:
 
   printArgs = args: lib.dlopen print-args-so "print" [ args ];
 in printArgs args
+```
+
+Sketch of what `nix-exec`-based `nixops` might look like:
+
+```nix
+#!/usr/bin/env nix-exec
+{ args, lib }: let
+  nixops-src = lib.builtins.fetchgit { url = git://github.com/NixOS/nix-exec.git; rev = "v3.0.4"; };
+
+  nixops-import = lib.join (lib.map (src: import src lib) nixops-src);
+in lib.join (lib.map (nixops: let
+  lib = nixops.lib.nix-exec;
+
+  processed = nixops.process-args args;
+
+  info = lib.bind processed (args: nixops.query-db args.uuid);
+
+  drv = info: nixops.eval-network info.expr info.args info.nix-path;
+
+  build = info: drv: lib.mapM (host: nixops.build-remote drv.${host} host) info.hosts;
+
+  activate = info: drv: lib.mapM (host: nixops.activate drv.${host} host) info.hosts;
+in lib.bind info (info: lib.bind (drv info) (drv: lib.bind (build info drv) (results:
+  if lib.all-success results then lib.bind (activate info drv) (results: if lib.all-success results then nixops.exit 0 else nixops.exit 1) else nixops.exit 1
+)))) nixops-import)
 ```
 
 [1]: http://en.wikipedia.org/wiki/Monad_(functional_programming)
