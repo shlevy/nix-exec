@@ -96,14 +96,14 @@ extern "C" void fetchgit( nix::EvalState & state
     case -1:
       throw SysError("forking to run fetchgit");
     case 0:
-      pipe.readSide.close();
+      pipe.readSide = -1;
       if (dup2(pipe.writeSide, STDOUT_FILENO) == -1)
         err(214, "duping pipe to stdout");
       /* const-correct, execv doesn't modify it c just has dumb casting rules */
       execv(fetchgit_path, const_cast<char * const *>(argv));
       err(212, "executing %s", fetchgit_path);
   }
-  pipe.writeSide.close();
+  pipe.writeSide = -1;
   auto path = nix::drainFD(pipe.readSide);
 
   int status;
