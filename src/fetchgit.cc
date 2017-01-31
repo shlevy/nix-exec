@@ -78,7 +78,7 @@ extern "C" void fetchgit( nix::EvalState & state
   auto submodules_iter = args[0]->attrs->find(submodules_sym);
   auto do_submodules = submodules_iter == args[0]->attrs->end() ?
     true :
-    state.forceBool(*submodules_iter->value);
+    state.forceBool(*submodules_iter->value, *submodules_iter->pos);
 
   constexpr char fetchgit_path[] = NIXEXEC_LIBEXEC_DIR "/fetchgit.sh";
   const char * const argv[] = { fetchgit_path
